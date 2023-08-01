@@ -18,11 +18,41 @@ const saySomething = (req, res) => {
   res.send(content)
 }
 
+const checkForAbbreviationLength = (req, res, next) => {
+  const abbreviation = req.params.abbreviation
+  if(abbreviation.length !== 2){
+    next(`States abbreviations "${abbreviation}" is invalid.`)
+  } else {
+    next()
+  }
+}
+
 app.use(morgan("dev"))
 
-// app.use((req, res, next) => {
-//   res.send(`The route ${req.path} does not exist!`)
-// }) 
+app.get("/hello", sayHello)
+
+app.get("/say/goodbye", sayBye)
+
+app.get("/say/:greeting", saySomething)
+
+app.get(
+  "/states/:abbreviation", 
+  checkForAbbreviationLength, 
+  (req, res, next) => {
+    res.send(`${req.params.abbreviation} is a nice state, I'd like to visit soon! thanks`)
+})
+ 
+app.get(
+  "/travel/:abbreviation",
+  checkForAbbreviationLength,
+   (req, res, next) => {
+    res.send(`Enjoy your trip to ${req.params.abbreviation}`)
+})
+
+//error handling
+app.use((req, res, next) => {
+  res.send(`The route ${req.path} does not exist!`)
+}) 
 
 app.use((err, req, res, next) => {
   console.error(err)
@@ -30,16 +60,4 @@ app.use((err, req, res, next) => {
 })
 
 
-app.get("/hello", sayHello)
-app.get("/say/goodbye", sayBye)
-app.get("/say/:greeting", saySomething)
-app.get("/states/:abbreviation", (req, res, send) => {
-  const abbreviation = req.params.abbreviation
-  if(abbreviation.length !== 2){
-    next("State abbreviation is invalid.")
-  } else {
-    res.send(`${abbreviation} is a nice state, I'd like to visit soon!`)
-  }
-})
- 
 module.exports = app
