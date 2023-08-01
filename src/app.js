@@ -20,20 +20,26 @@ const saySomething = (req, res) => {
 
 app.use(morgan("dev"))
 
-app.use((req, res, next) => {
-  res.send(`The route ${req.path} does not exist!`)
-}) 
+// app.use((req, res, next) => {
+//   res.send(`The route ${req.path} does not exist!`)
+// }) 
 
 app.use((err, req, res, next) => {
   console.error(err)
   res.send(err)
 })
 
+
 app.get("/hello", sayHello)
 app.get("/say/goodbye", sayBye)
 app.get("/say/:greeting", saySomething)
 app.get("/states/:abbreviation", (req, res, send) => {
-  
+  const abbreviation = req.params.abbreviation
+  if(abbreviation.length !== 2){
+    next("State abbreviation is invalid.")
+  } else {
+    res.send(`${abbreviation} is a nice state, I'd like to visit soon!`)
+  }
 })
  
 module.exports = app
